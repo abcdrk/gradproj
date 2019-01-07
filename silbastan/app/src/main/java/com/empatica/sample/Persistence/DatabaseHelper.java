@@ -6,11 +6,16 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class DatabaseHelper extends SQLiteOpenHelper {
+    public static Lock lock = new ReentrantLock();
     // Database Version
     private static final int DATABASE_VERSION = 1;
 
@@ -47,6 +52,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     public long insertSensorData(SensorData data) {
+        lock.lock();
         // get writable database as we want to write data
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -62,21 +68,42 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // close db connection
         db.close();
 
+        lock.unlock();
         // return newly inserted row id
         return id;
     }
 
     public List<SensorData> getSensorDatas() {
-        return this.getSensorDatas(null);
+        return this.getSensorDatas(null, null);
     }
 
     public List<SensorData> getSensorDatas(SensorData.Type type) {
+        return getSensorDatas(type, null);
+    }
+
+    public List<SensorData> getSensorDatas(SensorData.Type type, Date date) {
+        lock.lock();
         List<SensorData> datas = new ArrayList<SensorData>();
 
+        Timestamp timestamp = null;
+        if (date != null) {
+            timestamp = new Timestamp(date.getTime());
+        }
+
+        String typeWhere = "";
+        String timestampWhere = "";
+
+        if (type != null) {
+            typeWhere = " WHERE " + COLUMN_SENSOR_TYPE + " = " + type.data;
+        }
+
+        if (timestamp != null) {
+            timestampWhere = (type == null)
+                    ? " WHERE " + COLUMN_SENSOR_TIME + " < " + timestamp.toString()
+                    : " AND " + COLUMN_SENSOR_TIME + " < " + timestamp.toString();
+        }
         // Select All Query
-        String selectQuery = (type == null)
-                ? "SELECT  * FROM " + TABLE_NAME_SENSOR + " ORDER BY " + COLUMN_SENSOR_TIME + " DESC"
-                : "SELECT  * FROM " + TABLE_NAME_SENSOR + " WHERE " + COLUMN_SENSOR_TYPE + " = " + type.data + " ORDER BY " + COLUMN_SENSOR_TIME + " DESC";
+        String selectQuery = "SELECT  * FROM " + TABLE_NAME_SENSOR + typeWhere + timestampWhere + " ORDER BY " + COLUMN_SENSOR_TIME + " DESC";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -96,6 +123,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // close db connection
         db.close();
 
+        lock.unlock();
         // return datas list
         return datas;
     }
@@ -105,6 +133,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public int getSensorDatasCount(SensorData.Type type) {
+        lock.lock();
         String countQuery = (type == null)
                 ? "SELECT  * FROM " + TABLE_NAME_SENSOR
                 : "SELECT  * FROM " + TABLE_NAME_SENSOR + " WHERE " + COLUMN_SENSOR_TYPE + " = " + type.data;
@@ -115,8 +144,38 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         int count = cursor.getCount();
         cursor.close();
 
+        lock.unlock();
         // return count
         return count;
+    }
+
+    public void deleteSensorDatas() {
+        deleteSensorDatas(null, null);
+    }
+
+    public void deleteSensorDatas(SensorData.Type type) {
+        deleteSensorDatas(type, null);
+    }
+
+    public void deleteSensorDatas(SensorData.Type type, Date date) {
+        lock.lock();
+        Timestamp timestamp = null;
+        if (date != null) {
+            timestamp = new Timestamp(date.getTime());
+        }
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        if (type == null && timestamp == null) {
+            db.delete(TABLE_NAME_SENSOR, null, null);
+        } else if (type != null && timestamp == null) {
+            db.delete(TABLE_NAME_SENSOR, COLUMN_SENSOR_TYPE + " = ?", new String[]{String.valueOf(type.data)});
+        } else if (type == null && timestamp != null) {
+            db.delete(TABLE_NAME_SENSOR, COLUMN_SENSOR_TIME + " < ?", new String[]{timestamp.toString()});
+        } else {
+            db.delete(TABLE_NAME_SENSOR, COLUMN_SENSOR_TYPE + " = ? AND " + COLUMN_SENSOR_TIME + " < ?", new String[]{String.valueOf(type.data), timestamp.toString()});
+        }
+        db.close();
+        lock.unlock();
     }
 
     @Override
