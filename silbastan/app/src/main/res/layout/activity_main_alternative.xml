@@ -18,18 +18,58 @@
             android:layout_height="36dp"
             android:background="@color/colorWhite"/>
 
+
         <TextView
             android:id="@+id/deviceName"
             android:layout_below="@id/status"
             android:layout_width="match_parent"
             android:layout_height="36dp"/>
 
+        <TextView
+            android:id="@+id/sensorAccData"
+            android:layout_below="@id/deviceName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorWhite"
+            android:text="No Acceleration Sensor"/>
+
+        <TextView
+            android:id="@+id/sensorLightData"
+            android:layout_below="@id/sensorAccData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorWhite"
+            android:text="No Light Sensor"/>
+
+        <TextView
+            android:id="@+id/sensorTempData"
+            android:layout_below="@id/sensorLightData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorWhite"
+            android:text="No Temperature Sensor"/>
+
+        <TextView
+            android:id="@+id/sensorStepData"
+            android:layout_below="@id/sensorTempData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorWhite"
+            android:text="No Step Sensor"/>
+
+        <TextView
+            android:id="@+id/callLogData"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorWhite"
+            android:text="No Call Log"/>
+
         <LinearLayout
             android:visibility="invisible"
             android:id="@+id/dataArea"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/deviceName"
+            android:layout_below="@id/sensorStepData"
             android:orientation="vertical">
 
             <TextView

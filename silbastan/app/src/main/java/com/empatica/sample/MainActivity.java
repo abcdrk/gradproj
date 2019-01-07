@@ -8,6 +8,10 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,9 +45,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 
 
-public class MainActivity extends AppCompatActivity implements EmpaDataDelegate, EmpaStatusDelegate {
+public class MainActivity extends AppCompatActivity implements EmpaDataDelegate, EmpaStatusDelegate, SensorEventListener {
 
     private static final int REQUEST_ENABLE_BT = 1;
 
@@ -78,10 +83,36 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     private TextView file_view;
 
+    //ACCELOMETER
+    private SensorManager acc_manager;
+    private Sensor accelerometer;
+    private TextView acc_textView;
+    private float xAcceleration,yAcceleration,zAcceleration;
+
+    //LIGHT SENSOR
+    private SensorManager light_manager;
+    private Sensor light_sensor;
+    private TextView light_textView;
+    private float light;
+
+    //STEP COUNTER
+    private SensorManager step_manager;
+    private Sensor step_sensor;
+    private TextView step_textView;
+    private float step;
+
+    //TEMPERATURE
+    private SensorManager temp_manager;
+    private Sensor temp_sensor;
+    private TextView temp_textView;
+    private float temp;
+
+    //SENSOR LIST
+    private SensorManager mSensorManager;
+    private Sensor mSensor;
+
     FileOutputStream outputStream;
 
-    String ibi_filename = "ibi_file";
-    String acc_filename = "acc_file";
 
 
     @Override
@@ -116,6 +147,30 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
         file_view = (TextView) findViewById(R.id.file_view);
 
+        acc_textView = (TextView)findViewById(R.id.sensorAccData);
+        light_textView = (TextView)findViewById(R.id.sensorLightData);
+        temp_textView = (TextView)findViewById(R.id.sensorTempData);
+        step_textView = (TextView)findViewById(R.id.sensorStepData);
+
+        // Set The Sensor Managers
+        acc_manager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        light_manager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        step_manager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        temp_manager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+        // Set The Sensors
+        accelerometer = acc_manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        light_sensor = light_manager.getDefaultSensor(Sensor.TYPE_LIGHT);
+        //step_sensor = light_manager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        //temp_sensor = light_manager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+
+        acc_manager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        light_manager.registerListener(this, light_sensor, SensorManager.SENSOR_DELAY_NORMAL);
+//        step_manager.registerListener(this, step_sensor, SensorManager.SENSOR_DELAY_NORMAL);
+//        temp_manager.registerListener(this, temp_sensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+
 
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 
@@ -132,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         });
 
         initEmpaticaDeviceManager();
+
     }
 
     @Override
@@ -200,6 +256,28 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
             // Initialize the Device Manager using your API key. You need to have Internet access at this point.
             deviceManager.authenticateWithAPIKey(EMPATICA_API_KEY);
+        }
+    }
+
+    private void initCallLogPermission(){
+        if( ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_CALL_LOG)
+                != PackageManager.PERMISSION_GRANTED ){
+            if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,Manifest.permission.READ_CALL_LOG))
+            {
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_CALL_LOG},1);
+            }
+            else{
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_CALL_LOG},1);
+            }
+        }
+        else{
+            // do stuff
+            TextView textView = (TextView) findViewById(R.id.textView);
+            try {
+                textView.setText(getCallDetails());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -295,16 +373,16 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
         String content = "x: "+x+" y: "+y+" z: "+z;
 
-        try {
-            outputStream = openFileOutput(acc_filename, Context.MODE_APPEND | Context.MODE_PRIVATE);
-            outputStream.write(content.getBytes());
-            outputStream.close();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            outputStream = openFileOutput(acc_filename, Context.MODE_APPEND | Context.MODE_PRIVATE);
+//            outputStream.write(content.getBytes());
+//            outputStream.close();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
-        updateLabel(file_view, readFromFile(this, acc_filename));
+//        updateLabel(file_view, readFromFile(this, acc_filename));
 
         //acc_file_textView.setText(readFromFile(this, ibi_filename));
     }
@@ -428,5 +506,46 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         }
 
         return ret;
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+
+        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            xAcceleration = event.values[0];
+            yAcceleration = event.values[1];
+            zAcceleration = event.values[2];
+
+            String content = "x:"+xAcceleration+"\nY:"+yAcceleration+"\nZ:"+zAcceleration+"\n";
+
+            acc_textView.setText(content);
+
+
+        }
+
+        if(event.sensor.getType() == Sensor.TYPE_LIGHT) {
+            String content = "intensity: "+event.values[0]+"\n";
+            light_textView.setText(content);
+
+        }
+
+        if(event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
+            String content = "temperature: "+event.values[0]+"\n";
+            temp_textView.setText(content);
+
+        }
+
+        if(event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
+            String content = "Step: "+event.values[0]+"\n";
+            step_textView.setText(content);
+        }
+
+
+
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 }

@@ -296,14 +296,14 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
         String content = "x: "+x+" y: "+y+" z: "+z;
 
-        try {
-            outputStream = openFileOutput(acc_filename, Context.MODE_APPEND | Context.MODE_PRIVATE);
-            outputStream.write(content.getBytes());
-            outputStream.close();
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            outputStream = openFileOutput(acc_filename, Context.MODE_APPEND | Context.MODE_PRIVATE);
+//            outputStream.write(content.getBytes());
+//            outputStream.close();
+//        }
+//        catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         updateLabel(file_view, readFromFile(this, acc_filename));
 

@@ -105,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
     // DENEME
     String acc_empth_filename = "acc_empth_file";
     String ibi_filename = "ibi_file";
+    String eda_filename = "eda_file";
 
 
     // LIGHT SENSOR
@@ -114,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
     private TextView light_file_textView;
     private float light;
     String light_filename = "light_file";
-
 
     // SENSOR LIST
     private SensorManager mSensorManager;
@@ -184,9 +184,8 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
             }
         });
 
-
         printSensors();
-        startTimer();
+        //startTimer();
     }
 
     @Override
@@ -351,7 +350,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         updateLabel(accel_yLabel, "" + y);
         updateLabel(accel_zLabel, "" + z);
 
-        String content = "X:"+x+"\nY:"+y+"\nZ:"+z+"\n";
+        String content = "X:"+x+" Y:"+y+" Z:"+z+"\n";
 
         try {
             outputStream = openFileOutput(acc_empth_filename, Context.MODE_APPEND | Context.MODE_PRIVATE);
@@ -386,11 +385,11 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
     public void didReceiveIBI(float ibi, double timestamp) {
         updateLabel(ibiLabel, "" + ibi);
 
-        String content = "" + ibi;
+        String content_ibi = "" + ibi;
 
         try {
             outputStream = openFileOutput(ibi_filename, Context.MODE_APPEND | Context.MODE_PRIVATE);
-            outputStream.write(content.getBytes());
+            outputStream.write(content_ibi.getBytes());
             outputStream.close();
         }
         catch (Exception e) {
@@ -537,9 +536,8 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         initializeTimerTask1();
 
         //schedule the timer, after the first 5000ms the TimerTask will run every 10000ms
-        timer.schedule(timerTask, 0, 120000); //
-
-        timer1.schedule(timerTask1, 100000, 120000); //
+        timer.schedule(timerTask, 0, 12000); //
+        timer1.schedule(timerTask1, 10000, 12000); //
     }
 
     public void stoptimertask(View v) {
@@ -558,7 +556,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
                 //use a handler to run a toast that shows the current timestamp
                 handler.post(new Runnable() {
                     public void run() {
-                        clearFiles();
+                        //clearFiles();
                         registerListeners();
                         System.out.println("START");
                     }
@@ -588,6 +586,9 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
     public void registerListeners(){
         acc_manager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         light_manager.registerListener(this, light_sensor, SensorManager.SENSOR_DELAY_NORMAL);
+//        if (deviceManager != null) {
+//            deviceManager.startScanning();
+//        }
     }
 
 
@@ -595,6 +596,9 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         acc_manager.unregisterListener(this);
         light_manager.unregisterListener(this);
         mSensorManager.unregisterListener(this);
+        if (deviceManager != null) {
+            deviceManager.stopScanning();
+        }
     }
 
     private String readFromFile(Context context, String filename) {
