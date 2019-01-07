@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -15,6 +16,7 @@ import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.CallLog;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -46,6 +48,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 
 public class MainActivity extends AppCompatActivity implements EmpaDataDelegate, EmpaStatusDelegate, SensorEventListener {
@@ -87,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
     private SensorManager acc_manager;
     private Sensor accelerometer;
     private TextView acc_textView;
-    private float xAcceleration,yAcceleration,zAcceleration;
+    private float xAcceleration, yAcceleration, zAcceleration;
 
     //LIGHT SENSOR
     private SensorManager light_manager;
@@ -107,12 +112,14 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
     private TextView temp_textView;
     private float temp;
 
+    // CALL LOG
+    private TextView call_textView;
+
     //SENSOR LIST
     private SensorManager mSensorManager;
     private Sensor mSensor;
 
     FileOutputStream outputStream;
-
 
 
     @Override
@@ -147,10 +154,12 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
         file_view = (TextView) findViewById(R.id.file_view);
 
-        acc_textView = (TextView)findViewById(R.id.sensorAccData);
-        light_textView = (TextView)findViewById(R.id.sensorLightData);
-        temp_textView = (TextView)findViewById(R.id.sensorTempData);
-        step_textView = (TextView)findViewById(R.id.sensorStepData);
+        call_textView = (TextView) findViewById(R.id.callLogData);
+
+        acc_textView = (TextView) findViewById(R.id.sensorAccData);
+        light_textView = (TextView) findViewById(R.id.sensorLightData);
+        temp_textView = (TextView) findViewById(R.id.sensorTempData);
+        step_textView = (TextView) findViewById(R.id.sensorStepData);
 
         // Set The Sensor Managers
         acc_manager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -171,7 +180,6 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 //        temp_manager.registerListener(this, temp_sensor, SensorManager.SENSOR_DELAY_NORMAL);
 
 
-
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 
         disconnectButton.setOnClickListener(new View.OnClickListener() {
@@ -186,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
             }
         });
 
+        initCallLogPermission();
         initEmpaticaDeviceManager();
 
     }
@@ -228,13 +237,32 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
                             .show();
                 }
                 break;
+
+            case 2:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ContextCompat.checkSelfPermission(MainActivity.this,
+                            Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED) {
+                        Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
+
+                        // do stuff
+                        call_textView = (TextView) findViewById(R.id.callLogData);
+                        try {
+                            call_textView.setText(getCallDetails());
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                } else {
+                    Toast.makeText(this, "No permission granted!", Toast.LENGTH_SHORT).show();
+                }
+                break;
         }
     }
 
     private void initEmpaticaDeviceManager() {
         // Android 6 (API level 23) now require ACCESS_COARSE_LOCATION permission to use BLE
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.ACCESS_COARSE_LOCATION }, REQUEST_PERMISSION_ACCESS_COARSE_LOCATION);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_ACCESS_COARSE_LOCATION);
         } else {
 
             if (TextUtils.isEmpty(EMPATICA_API_KEY)) {
@@ -259,20 +287,18 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         }
     }
 
-    private void initCallLogPermission(){
-        if( ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_CALL_LOG)
-                != PackageManager.PERMISSION_GRANTED ){
-            if(ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,Manifest.permission.READ_CALL_LOG))
-            {
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_CALL_LOG},1);
+    private void initCallLogPermission() {
+
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, Manifest.permission.READ_CALL_LOG)) {
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_CALL_LOG}, 2);
+            } else {
+                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_CALL_LOG}, 2);
             }
-            else{
-                ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.READ_CALL_LOG},1);
-            }
-        }
-        else{
+
+        } else {
             // do stuff
-            TextView textView = (TextView) findViewById(R.id.textView);
+            TextView textView = (TextView) findViewById(R.id.callLogData);
             try {
                 textView.setText(getCallDetails());
             } catch (ParseException e) {
@@ -298,7 +324,8 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
     }
 
     @Override
-    public void didDiscoverDevice(EmpaticaDevice bluetoothDevice, String deviceName, int rssi, boolean allowed) {
+    public void didDiscoverDevice(EmpaticaDevice bluetoothDevice, String deviceName, int rssi,
+                                  boolean allowed) {
         // Check if the discovered device can be used with your API key. If allowed is always false,
         // the device is not linked with your API key. Please check your developer area at
         // https://www.empatica.com/connect/developer.php
@@ -371,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         updateLabel(accel_yLabel, "" + y);
         updateLabel(accel_zLabel, "" + z);
 
-        String content = "x: "+x+" y: "+y+" z: "+z;
+        String content = "x: " + x + " y: " + y + " z: " + z;
 
 //        try {
 //            outputStream = openFileOutput(acc_filename, Context.MODE_APPEND | Context.MODE_PRIVATE);
@@ -444,8 +471,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
                 if (status == EmpaSensorStatus.ON_WRIST) {
 
                     ((TextView) findViewById(R.id.wrist_status_label)).setText("ON WRIST");
-                }
-                else {
+                } else {
 
                     ((TextView) findViewById(R.id.wrist_status_label)).setText("NOT ON WRIST");
                 }
@@ -484,13 +510,13 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         try {
             InputStream inputStream = context.openFileInput(filename);
 
-            if ( inputStream != null ) {
+            if (inputStream != null) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
                 String receiveString = "";
                 StringBuilder stringBuilder = new StringBuilder();
 
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
+                while ((receiveString = bufferedReader.readLine()) != null) {
                     stringBuilder.append(receiveString);
                     stringBuilder.append("\n");
                 }
@@ -498,8 +524,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
                 inputStream.close();
                 ret = stringBuilder.toString();
             }
-        }
-        catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             Log.e("login activity", "File not found: " + e.toString());
         } catch (IOException e) {
             Log.e("login activity", "Can not read file: " + e.toString());
@@ -511,35 +536,34 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
     @Override
     public void onSensorChanged(SensorEvent event) {
 
-        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             xAcceleration = event.values[0];
             yAcceleration = event.values[1];
             zAcceleration = event.values[2];
 
-            String content = "x:"+xAcceleration+"\nY:"+yAcceleration+"\nZ:"+zAcceleration+"\n";
+            String content = "x:" + xAcceleration + "\nY:" + yAcceleration + "\nZ:" + zAcceleration + "\n";
 
             acc_textView.setText(content);
 
 
         }
 
-        if(event.sensor.getType() == Sensor.TYPE_LIGHT) {
-            String content = "intensity: "+event.values[0]+"\n";
+        if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
+            String content = "intensity: " + event.values[0] + "\n";
             light_textView.setText(content);
 
         }
 
-        if(event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
-            String content = "temperature: "+event.values[0]+"\n";
+        if (event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
+            String content = "temperature: " + event.values[0] + "\n";
             temp_textView.setText(content);
 
         }
 
-        if(event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
-            String content = "Step: "+event.values[0]+"\n";
+        if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
+            String content = "Step: " + event.values[0] + "\n";
             step_textView.setText(content);
         }
-
 
 
     }
@@ -547,5 +571,81 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    private String getCallDetails() throws ParseException {
+        StringBuffer sb = new StringBuffer();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return "GET CALL DETAIL ERROR";
+        }
+        Cursor managedCursor = getContentResolver().query(CallLog.Calls.CONTENT_URI, null, null, null, null);
+        int number = managedCursor.getColumnIndex(CallLog.Calls.NUMBER);
+        int type = managedCursor.getColumnIndex(CallLog.Calls.TYPE);
+        int date = managedCursor.getColumnIndex(CallLog.Calls.DATE);
+        int duration = managedCursor.getColumnIndex(CallLog.Calls.DURATION);
+        int call_number = 0;
+        int missed_number = 0;
+        //String valid_until = "30-12-18 18:45";
+
+        sb.append("Call Details:\n\n");
+
+        //SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yy HH:mm");
+        //Date strDate = sdf.parse(valid_until);
+
+
+        while (managedCursor.moveToNext()) {
+            String phNumber = managedCursor.getString(number);
+            String callType = managedCursor.getString(type);
+            String callDate = managedCursor.getString(date);
+
+
+            Date callDayTime = new Date(Long.valueOf(callDate));
+            Date current = Calendar.getInstance().getTime();
+
+            // (29 + 15 + 60) * 60 * 1000 = 6240000L
+            // One Day Before: 1 * 24 * 60 * 60 * 1000 = 86400000L
+
+            Date one_day_before = new Date(current.getTime() - 86400000L);
+
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yy HH:mm");
+            String dateString = formatter.format(callDayTime);
+
+            String callDuration = managedCursor.getString(duration);
+
+            if (callDayTime.before(one_day_before)) {
+                continue;
+            }
+
+            String dir = null;
+            int dircode = Integer.parseInt(callType);
+            switch (dircode) {
+                case CallLog.Calls.OUTGOING_TYPE:
+                    dir = "OUTGOING";
+                    call_number++;
+                    break;
+
+                case CallLog.Calls.INCOMING_TYPE:
+                    dir = "INCOMING";
+                    call_number++;
+                    break;
+
+                case CallLog.Calls.MISSED_TYPE:
+                    dir = "MISSED";
+                    missed_number++;
+                    break;
+            }
+            sb.append("\nPhone NUmber: " + phNumber + " \nCall Type: " + dir + " \nCall Date: " + dateString + " \nCall Duration: " + callDuration);
+            sb.append("\n-----------------------------------------------");
+        }
+        sb.append("\nNumber of Calls: " + call_number + "\nNumber of Missed Calls: " + missed_number);
+        managedCursor.close();
+        return sb.toString();
     }
 }
