@@ -1,6 +1,18 @@
 package com.empatica.sample.Persistence;
 
+import android.util.Log;
+
+import org.apache.commons.math3.complex.Complex;
+import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.transform.DftNormalization;
+import org.apache.commons.math3.transform.FastFourierTransformer;
+import org.apache.commons.math3.transform.TransformType;
+import org.apache.commons.math3.util.FastMath;
+
+import java.util.ArrayList;
+
 public class Result {
+    public static final double FREQUENCY_THRESHOLD = 0.15;
     private String timestamp;
     private Double meanHR;
     private Double stdHR;
@@ -158,4 +170,70 @@ public class Result {
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
+
+    public void calculateHR(ArrayList<SensorData> ibis) {
+        double[] hrArr = dataListToArray(ibis);
+        this.setMeanHR(StatUtils.mean(hrArr));
+        this.setStdHR(FastMath.sqrt(StatUtils.variance(hrArr)));
+        double[] hrArr32 = new double[32];
+        for (int i = 0; i < 32; i++) {
+            hrArr32[i] = 0;
+        }
+        for (int i = 0; i < Math.min(hrArr.length, 32); i++) {
+            hrArr32[i] = hrArr[i];
+        }
+
+        FastFourierTransformer transformer = new FastFourierTransformer(DftNormalization.STANDARD);
+        Complex[] complexes = transformer.transform(hrArr32, TransformType.FORWARD);
+        double lfCount = 0;
+        double hfCount = 0;
+
+        for (int i = 0; i < complexes.length; i++) {
+//            Log.d("IBI", String.format("Complex Number: %f + %fi abs: %f", complexes[i].getReal(), complexes[i].getImaginary(), complexes[i].abs()));
+            if (Math.abs(complexes[i].getImaginary()) < FREQUENCY_THRESHOLD) {
+                lfCount++;
+            } else {
+                hfCount++;
+            }
+        }
+        this.setHfHR(hfCount);
+        this.setLfHR(lfCount);
+        if (hfCount != 0) {
+            this.setLfhfHR(lfCount / hfCount);
+        }
+    }
+
+    public void calculateAcc(ArrayList<SensorData> xs, ArrayList<SensorData> ys, ArrayList<SensorData> zs) {
+        double[] xArr = dataListToArray(xs);
+        this.setMeanX(StatUtils.mean(xArr));
+
+        double[] yArr = dataListToArray(ys);
+        this.setMeanY(StatUtils.mean(yArr));
+
+        double[] zArr = dataListToArray(zs);
+        this.setMeanZ(StatUtils.mean(zArr));
+
+    }
+
+    public void calculateEDA(ArrayList<SensorData> edas) {
+        double[] edaArr = dataListToArray(edas);
+        this.setMeanEDA(StatUtils.mean(edaArr));
+        this.setStdEDA(FastMath.sqrt(StatUtils.variance(edaArr)));
+    }
+
+    public void calculateLight(ArrayList<SensorData> lights) {
+        double[] lightArr = dataListToArray(lights);
+        this.setMeanLight(StatUtils.mean(lightArr));
+        this.setStdLight(FastMath.sqrt(StatUtils.variance(lightArr)));
+    }
+
+    public double[] dataListToArray(ArrayList<SensorData> list) {
+        double[] arr = new double[list.size()];
+
+        for (int i = 0; i < arr.length; i++) {
+            arr[i] = list.get(i).getValue();
+        }
+        return arr;
+    }
+
 }

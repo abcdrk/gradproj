@@ -14,6 +14,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.CallLog;
@@ -40,6 +41,12 @@ import com.empatica.empalink.config.EmpaSensorType;
 import com.empatica.empalink.config.EmpaStatus;
 import com.empatica.empalink.delegate.EmpaDataDelegate;
 import com.empatica.empalink.delegate.EmpaStatusDelegate;
+import com.empatica.sample.Persistence.DataThread;
+import com.empatica.sample.Persistence.DatabaseHelper;
+import com.empatica.sample.Persistence.Result;
+import com.empatica.sample.Persistence.SensorData;
+
+import org.apache.commons.math3.stat.StatUtils;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
@@ -49,8 +56,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class MainActivity extends AppCompatActivity implements EmpaDataDelegate, EmpaStatusDelegate, SensorEventListener {
@@ -84,9 +98,15 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     private TextView deviceNameLabel;
 
+    private TextView dataCountLabel;
+
+    private TextView resultCountLabel;
+
     private LinearLayout dataCnt;
 
     private TextView file_view;
+
+    public static Lock insertLock = new ReentrantLock();
 
     //ACCELOMETER
     private SensorManager acc_manager;
@@ -121,11 +141,17 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     FileOutputStream outputStream;
 
+    // DB Helper
+    public static DatabaseHelper db;
+
+    private Set bluetoothDevices = new HashSet();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        this.db = new DatabaseHelper(getApplicationContext());
 
         setContentView(R.layout.activity_main_alternative);
 
@@ -151,6 +177,10 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         batteryLabel = (TextView) findViewById(R.id.battery);
 
         deviceNameLabel = (TextView) findViewById(R.id.deviceName);
+
+        dataCountLabel = (TextView) findViewById(R.id.dataCount);
+
+        resultCountLabel = (TextView) findViewById(R.id.resultCount);
 
         file_view = (TextView) findViewById(R.id.file_view);
 
@@ -194,8 +224,10 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
             }
         });
 
+        this.getDatabaseHelper().deleteSensorDatas();
         initCallLogPermission();
         initEmpaticaDeviceManager();
+        initCalculateTimer();
 
     }
 
@@ -246,17 +278,27 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
                         // do stuff
                         call_textView = (TextView) findViewById(R.id.callLogData);
-                        try {
-                            call_textView.setText(getCallDetails());
-                        } catch (ParseException e) {
-                            e.printStackTrace();
-                        }
+                        call_textView.setText(Integer.toString(getCallDetails()));
                     }
                 } else {
                     Toast.makeText(this, "No permission granted!", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
+    }
+
+    private void initCalculateTimer() {
+        Timer timer = new Timer();
+        TimerTask calculateTask = new TimerTask() {
+            @Override
+            public void run() {
+                calculateResult();
+            }
+        };
+
+//        timer.schedule(calculateTask, 0l, 1000 * 60 * 2);   // every 2 minutes
+        timer.schedule(calculateTask, 0l, 1000 * 20);   // every 20 seconds
+
     }
 
     private void initEmpaticaDeviceManager() {
@@ -299,12 +341,46 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         } else {
             // do stuff
             TextView textView = (TextView) findViewById(R.id.callLogData);
-            try {
-                textView.setText(getCallDetails());
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
+            textView.setText(Integer.toString(getCallDetails()));
         }
+    }
+
+    private void calculateResult() {
+        Date date = new Date();
+        Result result = new Result();
+        ArrayList<SensorData> xs = this.getDatabaseHelper().getSensorDatas(SensorData.Type.ACC_X, date);
+        ArrayList<SensorData> ys = this.getDatabaseHelper().getSensorDatas(SensorData.Type.ACC_Y, date);
+        ArrayList<SensorData> zs = this.getDatabaseHelper().getSensorDatas(SensorData.Type.ACC_Z, date);
+
+        result.calculateAcc(xs, ys, zs);
+
+        ArrayList<SensorData> edas = this.getDatabaseHelper().getSensorDatas(SensorData.Type.EDA, date);
+        result.calculateEDA(edas);
+
+        ArrayList<SensorData> lights = this.getDatabaseHelper().getSensorDatas(SensorData.Type.LIGHT, date);
+        result.calculateLight(lights);
+
+        ArrayList<SensorData> ibis = this.getDatabaseHelper().getSensorDatas(SensorData.Type.IBI, date);
+        result.calculateHR(ibis);
+
+
+        result.setCall((double) getCallDetails());
+
+
+        this.getDatabaseHelper().insertResult(result);
+
+        this.getDatabaseHelper().deleteSensorDatas();
+
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                Toast.makeText(MainActivity.this, "Results are calculated", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
     }
 
     @Override
@@ -332,10 +408,11 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         if (allowed) {
             // Stop scanning. The first allowed device will do.
             deviceManager.stopScanning();
+            System.out.println("[CAKIR]: stop scanning ");
             try {
                 // Connect to the device
                 deviceManager.connectDevice(bluetoothDevice);
-                updateLabel(deviceNameLabel, "To: " + deviceName);
+                updateLabel(deviceNameLabel, deviceName);
             } catch (ConnectionNotAllowedException e) {
                 // This should happen only if you try to connect when allowed == false.
                 Toast.makeText(MainActivity.this, "Sorry, you can't connect to this device", Toast.LENGTH_SHORT).show();
@@ -398,20 +475,9 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         updateLabel(accel_yLabel, "" + y);
         updateLabel(accel_zLabel, "" + z);
 
-        String content = "x: " + x + " y: " + y + " z: " + z;
-
-//        try {
-//            outputStream = openFileOutput(acc_filename, Context.MODE_APPEND | Context.MODE_PRIVATE);
-//            outputStream.write(content.getBytes());
-//            outputStream.close();
-//        }
-//        catch (Exception e) {
-//            e.printStackTrace();
-//        }
-
-//        updateLabel(file_view, readFromFile(this, acc_filename));
-
-        //acc_file_textView.setText(readFromFile(this, ibi_filename));
+        this.insertSensorData(SensorData.Type.ACC_X, x);
+        this.insertSensorData(SensorData.Type.ACC_Y, y);
+        this.insertSensorData(SensorData.Type.ACC_Z, z);
     }
 
     @Override
@@ -427,11 +493,13 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
     @Override
     public void didReceiveGSR(float gsr, double timestamp) {
         updateLabel(edaLabel, "" + gsr);
+        this.insertSensorData(SensorData.Type.EDA, gsr);
     }
 
     @Override
     public void didReceiveIBI(float ibi, double timestamp) {
         updateLabel(ibiLabel, "" + ibi);
+        this.insertSensorData(SensorData.Type.IBI, ibi);
     }
 
     @Override
@@ -541,31 +609,40 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
             yAcceleration = event.values[1];
             zAcceleration = event.values[2];
 
-            String content = "x:" + xAcceleration + "\nY:" + yAcceleration + "\nZ:" + zAcceleration + "\n";
-
+            String content = "X: " + xAcceleration + "\nY: " + yAcceleration + "\nZ: " + zAcceleration + "\n";
             acc_textView.setText(content);
-
+//            this.insertSensorData(SensorData.Type.ACC_PX, event.values[0]);
+//            this.insertSensorData(SensorData.Type.ACC_PY, event.values[1]);
+//            this.insertSensorData(SensorData.Type.ACC_PZ, event.values[2]);
 
         }
 
         if (event.sensor.getType() == Sensor.TYPE_LIGHT) {
-            String content = "intensity: " + event.values[0] + "\n";
-            light_textView.setText(content);
-
+            light_textView.setText(Double.toString(event.values[0]));
+            this.insertSensorData(SensorData.Type.LIGHT, event.values[0]);
         }
 
         if (event.sensor.getType() == Sensor.TYPE_AMBIENT_TEMPERATURE) {
-            String content = "temperature: " + event.values[0] + "\n";
-            temp_textView.setText(content);
+            temp_textView.setText(Double.toString(event.values[0]));
+            this.insertSensorData(SensorData.Type.TEMP, event.values[0]);
 
         }
 
         if (event.sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
-            String content = "Step: " + event.values[0] + "\n";
-            step_textView.setText(content);
+            step_textView.setText(Double.toString(event.values[0]));
+            this.insertSensorData(SensorData.Type.STEP, event.values[0]);
         }
 
+        dataCountLabel.setText(Integer.toString(this.getDatabaseHelper().getSensorDatasCount()));
+        resultCountLabel.setText(Integer.toString(this.getDatabaseHelper().getResultsCount()));
+    }
 
+    public DatabaseHelper getDatabaseHelper() {
+        return this.db;
+    }
+
+    public void insertSensorData(SensorData.Type type, float value) {
+        DataThread.getInstance(this.getDatabaseHelper()).insertSensorData(type, value);
     }
 
     @Override
@@ -573,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     }
 
-    private String getCallDetails() throws ParseException {
+    private int getCallDetails() {
         StringBuffer sb = new StringBuffer();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -583,7 +660,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            return "GET CALL DETAIL ERROR";
+            return 0;
         }
         Cursor managedCursor = getContentResolver().query(CallLog.Calls.CONTENT_URI, null, null, null, null);
         int number = managedCursor.getColumnIndex(CallLog.Calls.NUMBER);
@@ -641,11 +718,12 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
                     missed_number++;
                     break;
             }
-            sb.append("\nPhone NUmber: " + phNumber + " \nCall Type: " + dir + " \nCall Date: " + dateString + " \nCall Duration: " + callDuration);
-            sb.append("\n-----------------------------------------------");
+            //sb.append("\nPhone NUmber: " + phNumber + " \nCall Type: " + dir + " \nCall Date: " + dateString + " \nCall Duration: " + callDuration);
+            //sb.append("\n-----------------------------------------------");
         }
         sb.append("\nNumber of Calls: " + call_number + "\nNumber of Missed Calls: " + missed_number);
         managedCursor.close();
-        return sb.toString();
+        return call_number + missed_number;
     }
+
 }

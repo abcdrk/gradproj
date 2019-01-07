@@ -17,7 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static Lock lock = new ReentrantLock();
     // Database Version
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 5;
 
     // Database Name
     private static final String DATABASE_NAME = "empaticas_db";
@@ -128,9 +128,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return id;
     }
 
-    public List<Result> getResults() {
+    public ArrayList<Result> getResults() {
         lock.lock();
-        List<Result> results = new ArrayList<Result>();
+        ArrayList<Result> results = new ArrayList<Result>();
 
         // Select All Query
         String selectQuery = "SELECT  * FROM " + TABLE_NAME_RESULT + " ORDER BY " + COLUMN_RESULT_TIME + " DESC";
@@ -194,17 +194,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return id;
     }
 
-    public List<SensorData> getSensorDatas() {
+    public ArrayList<SensorData> getSensorDatas() {
         return this.getSensorDatas(null, null);
     }
 
-    public List<SensorData> getSensorDatas(SensorData.Type type) {
+    public ArrayList<SensorData> getSensorDatas(SensorData.Type type) {
         return getSensorDatas(type, null);
     }
 
-    public List<SensorData> getSensorDatas(SensorData.Type type, Date date) {
+    public ArrayList<SensorData> getSensorDatas(SensorData.Type type, Date date) {
         lock.lock();
-        List<SensorData> datas = new ArrayList<SensorData>();
+        ArrayList<SensorData> datas = new ArrayList<SensorData>();
 
         Timestamp timestamp = null;
         if (date != null) {
@@ -220,8 +220,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         if (timestamp != null) {
             timestampWhere = (type == null)
-                    ? " WHERE " + COLUMN_SENSOR_TIME + " < " + timestamp.toString()
-                    : " AND " + COLUMN_SENSOR_TIME + " < " + timestamp.toString();
+                    ? " WHERE " + COLUMN_SENSOR_TIME + " < '" + timestamp.toString() + "'"
+                    : " AND " + COLUMN_SENSOR_TIME + " < '" + timestamp.toString() + "'";
         }
         // Select All Query
         String selectQuery = "SELECT  * FROM " + TABLE_NAME_SENSOR + typeWhere + timestampWhere + " ORDER BY " + COLUMN_SENSOR_TIME + " DESC";
@@ -258,6 +258,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String countQuery = (type == null)
                 ? "SELECT  * FROM " + TABLE_NAME_SENSOR
                 : "SELECT  * FROM " + TABLE_NAME_SENSOR + " WHERE " + COLUMN_SENSOR_TYPE + " = " + type.data;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+
+        int count = cursor.getCount();
+        cursor.close();
+
+        lock.unlock();
+        // return count
+        return count;
+    }
+
+    public int getResultsCount() {
+        lock.lock();
+        String countQuery = "SELECT  * FROM " + TABLE_NAME_RESULT;
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);

@@ -5,4 +5,12 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="EmpTitle">
+
+        <item name="android:gravity">center</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@android:color/holo_blue_dark</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Medium</item>
+
+    </style>
 </resources>
