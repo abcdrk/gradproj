@@ -17,7 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class DatabaseHelper extends SQLiteOpenHelper {
     public static Lock lock = new ReentrantLock();
     // Database Version
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Database Name
     private static final String DATABASE_NAME = "empaticas_db";
@@ -25,7 +25,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Sensor Data Columns
     public static final String TABLE_NAME_SENSOR = "sensor_datas";
-
     private static final String COLUMN_SENSOR_ID = "id";
     private static final String COLUMN_SENSOR_TYPE = "type";
     private static final String COLUMN_SENSOR_VALUE = "value";
@@ -38,6 +37,49 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + COLUMN_SENSOR_TIME + " DATETIME DEFAULT CURRENT_TIMESTAMP"
                     + ")";
 
+    // Results Columns
+    public static final String TABLE_NAME_RESULT = "results";
+    private static final String COLUMN_RESULT_ID = "id";
+    private static final String COLUMN_RESULT_TIME = "time";
+    private static final String COLUMN_RESULT_MEAN_HR = "mean_hr";
+    private static final String COLUMN_RESULT_STD_HR = "std_hr";
+    private static final String COLUMN_RESULT_LF_HR = "lf_hr";
+    private static final String COLUMN_RESULT_HF_HR = "hf_hr";
+    private static final String COLUMN_RESULT_LF_HF_HR = "lf_hf_hr";
+    private static final String COLUMN_RESULT_MEAN_X = "mean_x";
+    private static final String COLUMN_RESULT_MEAN_Y = "mean_y";
+    private static final String COLUMN_RESULT_MEAN_Z = "mean_z";
+    private static final String COLUMN_RESULT_ENERGY_ACC = "energy_acc";
+    private static final String COLUMN_RESULT_MEAN_EDA = "mean_eda";
+    private static final String COLUMN_RESULT_STD_EDA = "std_eda";
+    private static final String COLUMN_RESULT_PEAKS_PER = "peaks_per";
+    private static final String COLUMN_RESULT_MEAN_LIGHT = "mean_light";
+    private static final String COLUMN_RESULT_STD_LIGHT = "std_light";
+    private static final String COLUMN_RESULT_STEP = "step";
+    private static final String COLUMN_RESULT_CALL = "call";
+
+    private static final String CREATE_TABLE_RESULT =
+            "CREATE TABLE " + TABLE_NAME_RESULT + "("
+                    + COLUMN_RESULT_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                    + COLUMN_RESULT_TIME + " DATETIME DEFAULT CURRENT_TIMESTAMP,"
+                    + COLUMN_RESULT_MEAN_HR + " DOUBLE,"
+                    + COLUMN_RESULT_STD_HR + " DOUBLE,"
+                    + COLUMN_RESULT_LF_HR + " DOUBLE,"
+                    + COLUMN_RESULT_HF_HR + " DOUBLE,"
+                    + COLUMN_RESULT_LF_HF_HR + " DOUBLE,"
+                    + COLUMN_RESULT_MEAN_X + " DOUBLE,"
+                    + COLUMN_RESULT_MEAN_Y + " DOUBLE,"
+                    + COLUMN_RESULT_MEAN_Z + " DOUBLE,"
+                    + COLUMN_RESULT_ENERGY_ACC + " DOUBLE,"
+                    + COLUMN_RESULT_MEAN_EDA + " DOUBLE,"
+                    + COLUMN_RESULT_STD_EDA + " DOUBLE,"
+                    + COLUMN_RESULT_PEAKS_PER + " DOUBLE,"
+                    + COLUMN_RESULT_MEAN_LIGHT + " DOUBLE,"
+                    + COLUMN_RESULT_STD_LIGHT + " DOUBLE,"
+                    + COLUMN_RESULT_STEP + " DOUBLE,"
+                    + COLUMN_RESULT_CALL + " DOUBLE"
+                    + ")";
+
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -45,11 +87,90 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-
-        // create notes table
         db.execSQL(CREATE_TABLE_SENSOR);
+        db.execSQL(CREATE_TABLE_RESULT);
     }
 
+
+    public long insertResult(Result result) {
+        lock.lock();
+        // get writable database as we want to write data
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        // `id` and `timestamp` will be inserted automatically.
+        // no need to add them
+        values.put(COLUMN_RESULT_MEAN_HR, result.getMeanHR());
+        values.put(COLUMN_RESULT_STD_HR, result.getStdHR());
+        values.put(COLUMN_RESULT_LF_HR, result.getLfHR());
+        values.put(COLUMN_RESULT_HF_HR, result.getHfHR());
+        values.put(COLUMN_RESULT_LF_HF_HR, result.getLfhfHR());
+        values.put(COLUMN_RESULT_MEAN_X, result.getMeanX());
+        values.put(COLUMN_RESULT_MEAN_Y, result.getMeanY());
+        values.put(COLUMN_RESULT_MEAN_Z, result.getMeanZ());
+        values.put(COLUMN_RESULT_ENERGY_ACC, result.getEnergyAcc());
+        values.put(COLUMN_RESULT_MEAN_EDA, result.getMeanEDA());
+        values.put(COLUMN_RESULT_STD_EDA, result.getStdEDA());
+        values.put(COLUMN_RESULT_PEAKS_PER, result.getPeaksPer());
+        values.put(COLUMN_RESULT_MEAN_LIGHT, result.getMeanLight());
+        values.put(COLUMN_RESULT_STD_LIGHT, result.getStdLight());
+        values.put(COLUMN_RESULT_STEP, result.getStep());
+        values.put(COLUMN_RESULT_CALL, result.getCall());
+
+        // insert row
+        long id = db.insert(TABLE_NAME_RESULT, null, values);
+
+        // close db connection
+        db.close();
+
+        lock.unlock();
+        // return newly inserted row id
+        return id;
+    }
+
+    public List<Result> getResults() {
+        lock.lock();
+        List<Result> results = new ArrayList<Result>();
+
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_NAME_RESULT + " ORDER BY " + COLUMN_RESULT_TIME + " DESC";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Result result = new Result();
+                result.setTimestamp(cursor.getString(cursor.getColumnIndex(COLUMN_RESULT_TIME)));
+
+                result.setMeanHR(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_HR)));
+                result.setStdHR(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_STD_HR)));
+                result.setLfHR(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_LF_HR)));
+                result.setHfHR(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_HF_HR)));
+                result.setLfhfHR(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_LF_HF_HR)));
+                result.setMeanX(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_X)));
+                result.setMeanY(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_Y)));
+                result.setMeanZ(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_Z)));
+                result.setEnergyAcc(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_ENERGY_ACC)));
+                result.setMeanEDA(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_EDA)));
+                result.setStdEDA(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_STD_EDA)));
+                result.setPeaksPer(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_PEAKS_PER)));
+                result.setMeanLight(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_LIGHT)));
+                result.setStdLight(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_STD_LIGHT)));
+                result.setStep(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_STEP)));
+                result.setCall(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_CALL)));
+                results.add(result);
+            } while (cursor.moveToNext());
+        }
+
+        // close db connection
+        db.close();
+
+        lock.unlock();
+        // return datas list
+        return results;
+    }
 
     public long insertSensorData(SensorData data) {
         lock.lock();
@@ -182,6 +303,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if existed
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_SENSOR);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_RESULT);
 
         // Create tables again
         onCreate(db);
