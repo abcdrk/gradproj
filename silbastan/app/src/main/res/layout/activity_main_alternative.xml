@@ -183,7 +183,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:width="50dp"
-                    android:text="@string/emptyText" />
+                    android:text="-" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/magnitude"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/magnitude"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:width="50dp"
+                    android:text="-" />
+
+
 
             </LinearLayout>
 

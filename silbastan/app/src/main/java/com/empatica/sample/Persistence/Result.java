@@ -10,6 +10,8 @@ import org.apache.commons.math3.transform.TransformType;
 import org.apache.commons.math3.util.FastMath;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class Result {
     public static final double FREQUENCY_THRESHOLD = 0.15;
@@ -22,6 +24,7 @@ public class Result {
     private Double meanX;
     private Double meanY;
     private Double meanZ;
+    private Double magnitude;
     private Double energyAcc;
     private Double meanEDA;
     private Double stdEDA;
@@ -97,6 +100,13 @@ public class Result {
 
     public void setMeanZ(Double meanZ) {
         this.meanZ = meanZ;
+    }
+
+    public Double getMagnitude() {
+        return magnitude;
+    }
+    public void setMagnitude(Double magnitude) {
+        this.magnitude = magnitude;
     }
 
     public Double getEnergyAcc() {
@@ -212,6 +222,29 @@ public class Result {
 
         double[] zArr = dataListToArray(zs);
         this.setMeanZ(StatUtils.mean(zArr));
+
+        ArrayList<Double> xSqrArr = new ArrayList<>();
+        ArrayList<Double> ySqrArr = new ArrayList<>();
+        ArrayList<Double> zSqrArr = new ArrayList<>();
+        for (double x : xArr) {
+            xSqrArr.add(x * x);
+        }
+
+        for (double y : yArr) {
+            ySqrArr.add(y * y);
+        }
+
+        for (double z : zArr) {
+            zSqrArr.add(z * z);
+        }
+
+        double[] pointMagnitude = new double[Math.min(Math.min(xArr.length, yArr.length), zArr.length)];
+
+        for (int i = 0 ; i < Math.min(Math.min(xArr.length, yArr.length), zArr.length) ; i++) {
+            pointMagnitude[i] = Math.sqrt(xSqrArr.get(i) + ySqrArr.get(i) + zSqrArr.get(i));
+        }
+        this.setMagnitude(StatUtils.mean(pointMagnitude));
+
 
     }
 

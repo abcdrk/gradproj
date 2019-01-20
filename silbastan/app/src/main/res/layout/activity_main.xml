@@ -79,6 +79,18 @@
                 android:id="@+id/accel_z"
                 android:text="@string/emptyText"/>
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/magnitude" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:width="50dp"
+                android:id="@+id/magnitude"
+                android:text="@string/emptyText"/>
+
         </LinearLayout>
 
         <TextView

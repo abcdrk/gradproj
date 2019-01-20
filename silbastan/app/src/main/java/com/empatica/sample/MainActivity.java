@@ -84,6 +84,8 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     private TextView accel_zLabel;
 
+    private TextView magnitudeLabel;
+
     private TextView bvpLabel;
 
     private TextView edaLabel;
@@ -165,6 +167,8 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         accel_yLabel = (TextView) findViewById(R.id.accel_y);
 
         accel_zLabel = (TextView) findViewById(R.id.accel_z);
+
+        magnitudeLabel = (TextView) findViewById(R.id.magnitude);
 
         bvpLabel = (TextView) findViewById(R.id.bvp);
 

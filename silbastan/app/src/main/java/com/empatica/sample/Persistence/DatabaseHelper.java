@@ -49,6 +49,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_RESULT_MEAN_X = "mean_x";
     private static final String COLUMN_RESULT_MEAN_Y = "mean_y";
     private static final String COLUMN_RESULT_MEAN_Z = "mean_z";
+    private static final String COLUMN_RESULT_MEAN_MAGNITUDE = "mean_magnitude";
     private static final String COLUMN_RESULT_ENERGY_ACC = "energy_acc";
     private static final String COLUMN_RESULT_MEAN_EDA = "mean_eda";
     private static final String COLUMN_RESULT_STD_EDA = "std_eda";
@@ -70,6 +71,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     + COLUMN_RESULT_MEAN_X + " DOUBLE,"
                     + COLUMN_RESULT_MEAN_Y + " DOUBLE,"
                     + COLUMN_RESULT_MEAN_Z + " DOUBLE,"
+                    + COLUMN_RESULT_MEAN_MAGNITUDE + " DOUBLE,"
                     + COLUMN_RESULT_ENERGY_ACC + " DOUBLE,"
                     + COLUMN_RESULT_MEAN_EDA + " DOUBLE,"
                     + COLUMN_RESULT_STD_EDA + " DOUBLE,"
@@ -108,6 +110,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_RESULT_MEAN_X, result.getMeanX());
         values.put(COLUMN_RESULT_MEAN_Y, result.getMeanY());
         values.put(COLUMN_RESULT_MEAN_Z, result.getMeanZ());
+        values.put(COLUMN_RESULT_MEAN_MAGNITUDE, result.getMagnitude());
         values.put(COLUMN_RESULT_ENERGY_ACC, result.getEnergyAcc());
         values.put(COLUMN_RESULT_MEAN_EDA, result.getMeanEDA());
         values.put(COLUMN_RESULT_STD_EDA, result.getStdEDA());
@@ -152,6 +155,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 result.setMeanX(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_X)));
                 result.setMeanY(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_Y)));
                 result.setMeanZ(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_Z)));
+                result.setMeanZ(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_MAGNITUDE)));
                 result.setEnergyAcc(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_ENERGY_ACC)));
                 result.setMeanEDA(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_EDA)));
                 result.setStdEDA(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_STD_EDA)));
