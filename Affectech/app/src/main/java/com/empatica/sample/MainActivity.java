@@ -98,13 +98,8 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     private TextView deviceNameLabel;
 
-    private TextView dataCountLabel;
-
-    private TextView resultCountLabel;
-
     private LinearLayout dataCnt;
 
-    private TextView file_view;
 
     public static Lock insertLock = new ReentrantLock();
 
@@ -143,12 +138,6 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         batteryLabel = (TextView) findViewById(R.id.battery);
 
         deviceNameLabel = (TextView) findViewById(R.id.deviceName);
-
-        dataCountLabel = (TextView) findViewById(R.id.dataCount);
-
-        resultCountLabel = (TextView) findViewById(R.id.resultCount);
-
-        file_view = (TextView) findViewById(R.id.file_view);
 
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 

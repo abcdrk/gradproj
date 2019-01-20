@@ -26,10 +26,6 @@ public class Result {
     private Double meanEDA;
     private Double stdEDA;
     private Double peaksPer;
-    private Double meanLight;
-    private Double stdLight;
-    private Double step;
-    private Double call;
 
     public Result() {
 
@@ -131,38 +127,6 @@ public class Result {
         this.peaksPer = peaksPer;
     }
 
-    public Double getMeanLight() {
-        return meanLight;
-    }
-
-    public void setMeanLight(Double meanLight) {
-        this.meanLight = meanLight;
-    }
-
-    public Double getStdLight() {
-        return stdLight;
-    }
-
-    public void setStdLight(Double stdLight) {
-        this.stdLight = stdLight;
-    }
-
-    public Double getStep() {
-        return step;
-    }
-
-    public void setStep(Double step) {
-        this.step = step;
-    }
-
-    public Double getCall() {
-        return call;
-    }
-
-    public void setCall(Double call) {
-        this.call = call;
-    }
-
     public String getTimestamp() {
         return timestamp;
     }
@@ -205,14 +169,21 @@ public class Result {
 
     public void calculateAcc(ArrayList<SensorData> xs, ArrayList<SensorData> ys, ArrayList<SensorData> zs) {
         double[] xArr = dataListToArray(xs);
-        this.setMeanX(StatUtils.mean(xArr));
-
         double[] yArr = dataListToArray(ys);
-        this.setMeanY(StatUtils.mean(yArr));
-
         double[] zArr = dataListToArray(zs);
-        this.setMeanZ(StatUtils.mean(zArr));
 
+        int length = Math.min(xArr.length,yArr.length);
+        length = Math.min(length, yArr.length);
+
+        int energy = 0;
+
+        for (int i= 0; i<length; i++){
+            
+        }
+
+        this.setMeanX(StatUtils.mean(xArr));
+        this.setMeanY(StatUtils.mean(yArr));
+        this.setMeanZ(StatUtils.mean(zArr));
     }
 
     public void calculateEDA(ArrayList<SensorData> edas) {
@@ -221,11 +192,6 @@ public class Result {
         this.setStdEDA(FastMath.sqrt(StatUtils.variance(edaArr)));
     }
 
-    public void calculateLight(ArrayList<SensorData> lights) {
-        double[] lightArr = dataListToArray(lights);
-        this.setMeanLight(StatUtils.mean(lightArr));
-        this.setStdLight(FastMath.sqrt(StatUtils.variance(lightArr)));
-    }
 
     public double[] dataListToArray(ArrayList<SensorData> list) {
         double[] arr = new double[list.size()];

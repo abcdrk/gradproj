@@ -35,17 +35,7 @@ public class SensorData {
         EDA(2),
         ACC_X(3),
         ACC_Y(4),
-        ACC_Z(5),
-        CALL(6),
-        LIGHT(7),
-        STEP(8),
-        TEMP(9),
-        BLUETOOTH(10),
-        APP_CAT(11),
-        SCREEN(12),
-        ACC_PX(13),
-        ACC_PY(14),
-        ACC_PZ(15);
+        ACC_Z(5);
 
         final int data;
 

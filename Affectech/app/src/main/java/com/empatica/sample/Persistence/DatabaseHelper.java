@@ -112,10 +112,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_RESULT_MEAN_EDA, result.getMeanEDA());
         values.put(COLUMN_RESULT_STD_EDA, result.getStdEDA());
         values.put(COLUMN_RESULT_PEAKS_PER, result.getPeaksPer());
-        values.put(COLUMN_RESULT_MEAN_LIGHT, result.getMeanLight());
-        values.put(COLUMN_RESULT_STD_LIGHT, result.getStdLight());
-        values.put(COLUMN_RESULT_STEP, result.getStep());
-        values.put(COLUMN_RESULT_CALL, result.getCall());
 
         // insert row
         long id = db.insert(TABLE_NAME_RESULT, null, values);
@@ -156,10 +152,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 result.setMeanEDA(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_EDA)));
                 result.setStdEDA(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_STD_EDA)));
                 result.setPeaksPer(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_PEAKS_PER)));
-                result.setMeanLight(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_MEAN_LIGHT)));
-                result.setStdLight(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_STD_LIGHT)));
-                result.setStep(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_STEP)));
-                result.setCall(cursor.getDouble(cursor.getColumnIndex(COLUMN_RESULT_CALL)));
                 results.add(result);
             } while (cursor.moveToNext());
         }
