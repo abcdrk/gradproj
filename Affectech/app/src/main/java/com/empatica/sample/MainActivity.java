@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     private TextView deviceNameLabel;
 
-    private LinearLayout dataCnt;
+    //private LinearLayout dataCnt;
 
     private TextView dataCountLabel;
 
@@ -120,12 +120,12 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
         this.db = new DatabaseHelper(getApplicationContext());
 
-        setContentView(R.layout.activity_main_alternative);
+        setContentView(R.layout.activity_main_v1);
 
         // Initialize vars that reference UI components
         statusLabel = (TextView) findViewById(R.id.status);
 
-        dataCnt = (LinearLayout) findViewById(R.id.dataArea);
+        //dataCnt = (LinearLayout) findViewById(R.id.dataArea);
 
         accel_xLabel = (TextView) findViewById(R.id.accel_x);
 
@@ -463,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
             @Override
             public void run() {
 
-                dataCnt.setVisibility(View.VISIBLE);
+                //dataCnt.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -475,7 +475,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
             @Override
             public void run() {
 
-                dataCnt.setVisibility(View.INVISIBLE);
+                //dataCnt.setVisibility(View.INVISIBLE);
             }
         });
     }

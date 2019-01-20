@@ -18,7 +18,7 @@
                 android:textAlignment="center"
                 android:padding="3dip"
                 android:gravity="left"
-                android:text="Status"
+                android:text="Wristband Status"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
         </TableRow>
 
@@ -33,6 +33,49 @@
                 android:text="Device ID"
                 android:textStyle="bold"/>
         </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/stress_level_label"
+                style="@style/EmpTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:textColor="@color/colorPrimary"
+                android:padding="3dip"
+                android:gravity="left"
+                android:text="Stress Level" />
+
+            <TextView
+                android:id="@+id/stress_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="-" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/activity_level_label"
+                style="@style/EmpTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:textColor="@color/colorPrimary"
+                android:padding="3dip"
+                android:gravity="left"
+                android:text="Activity Level" />
+
+            <TextView
+                android:id="@+id/activity_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="-" />
+        </TableRow>
+
 
         <TableRow>
             <TextView
@@ -76,6 +119,65 @@
                 android:text="0" />
         </TableRow>
 
+
+        <TableRow>
+            <TextView
+                android:id="@+id/accel_label"
+                style="@style/EmpTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:text="Accelometer" />
+
+            <LinearLayout
+                android:id="@+id/accel_area"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/accel_x"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/accel_x"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:width="30dp"
+                    android:text="@string/emptyText" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/accel_y"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/accel_y"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:width="30dp"
+                    android:text="@string/emptyText" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/accel_z"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/accel_z"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:width="30dp"
+                    android:text="@string/emptyText" />
+
+            </LinearLayout>
+        </TableRow>
+
         <TableRow>
             <TextView
                 android:id="@+id/acc_magnitude_label"
@@ -84,7 +186,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="left"
                 android:padding="3dip"
-                android:text="Magnitude" />
+                android:text="Acc Magnitude" />
 
             <TextView
                 android:id="@+id/acc_magnitude_area"
@@ -94,6 +196,134 @@
                 android:padding="3dip"
                 android:text="0" />
         </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/bvp_label"
+                style="@style/EmpTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="3dip"
+                android:text="@string/bvp_label" />
+
+            <TextView
+                android:id="@+id/bvp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="@string/emptyText" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/eda_label"
+                style="@style/EmpTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="3dip"
+                android:text="@string/eda_label" />
+
+            <TextView
+                android:id="@+id/eda"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="@string/emptyText" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/ibi_label"
+                style="@style/EmpTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="3dip"
+                android:text="@string/ibi_label" />
+
+            <TextView
+                android:id="@+id/ibi"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="@string/emptyText" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/temp_label"
+                style="@style/EmpTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="3dip"
+                android:text="@string/temp_label" />
+
+            <TextView
+                android:id="@+id/temperature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="@string/emptyText" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/battery_label"
+                style="@style/EmpTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="3dip"
+                android:text="@string/battery_label" />
+
+            <TextView
+                android:id="@+id/battery"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="@string/emptyText" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/wristband_status_label"
+                style="@style/EmpTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="3dip"
+                android:text="Wristband Status" />
+
+            <TextView
+                android:id="@+id/wrist_status_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="@string/emptyText" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"/>
+            <Button
+                android:id="@+id/disconnectButton"
+                style="@style/Widget.AppCompat.Button.Colored"
+                android:layout_width="match_parent"
+                android:layout_gravity="right"
+                android:layout_height="44dp"
+                android:text="STOP STREAMING" />
+        </TableRow>
+
     </TableLayout>
 
 </ScrollView>
