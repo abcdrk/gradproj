@@ -66,6 +66,8 @@ import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static java.lang.Double.NaN;
+
 
 public class MainActivity extends AppCompatActivity implements EmpaDataDelegate, EmpaStatusDelegate {
 
@@ -100,11 +102,15 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     //private LinearLayout dataCnt;
 
-    private TextView dataCountLabel;
-
     private TextView resultCountLabel;
 
     private TextView accMagLabel;
+
+    private TextView ibi_mean;
+
+    private TextView stress_level;
+
+    private TextView activity_level;
 
 
     public static Lock insertLock = new ReentrantLock();
@@ -145,11 +151,15 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
         deviceNameLabel = (TextView) findViewById(R.id.deviceName);
 
-        dataCountLabel = (TextView) findViewById(R.id.dataCount);
-
         resultCountLabel = (TextView) findViewById(R.id.resultCount);
 
         accMagLabel = (TextView) findViewById(R.id.acc_magnitude_area);
+
+        ibi_mean = (TextView) findViewById(R.id.ibi_mean);
+
+        stress_level = (TextView) findViewById(R.id.stress_level);
+
+        activity_level = (TextView) findViewById(R.id.activity_level);
 
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 
@@ -271,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         result.calculateEDA(edas);
 
         ArrayList<SensorData> ibis = this.getDatabaseHelper().getSensorDatas(SensorData.Type.IBI, date);
-        result.calculateHR(ibis);
+        final double meanHR = result.calculateHR(ibis);
 
 
         this.getDatabaseHelper().insertResult(result);
@@ -283,8 +293,22 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
             public void run() {
 
                 accMagLabel.setText("" + magnitude);
+                ibi_mean.setText("" + meanHR);
+
+                // STRESS LEVEL TRESHOLDS
+                if(meanHR == NaN){
+                    stress_level.setText("Waiting for Data");
+                }
+                else if(meanHR > 0.8){
+                    stress_level.setText("HIGH");
+                }
+                else{
+                    stress_level.setText("LOW");
+                }
+
                 Toast.makeText(MainActivity.this, "Results are calculated", Toast.LENGTH_SHORT).show();
                 updateCountLabels();
+
             }
         });
 
@@ -489,7 +513,6 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
     }
 
     public void updateCountLabels(){
-        dataCountLabel.setText(Integer.toString(this.getDatabaseHelper().getSensorDatasCount()));
         resultCountLabel.setText(Integer.toString(this.getDatabaseHelper().getResultsCount()));
     }
 

@@ -41,7 +41,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorAccent"
                 android:padding="3dip"
                 android:gravity="left"
                 android:text="Stress Level" />
@@ -62,7 +62,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
-                android:textColor="@color/colorPrimary"
+                android:textColor="@color/colorAccent"
                 android:padding="3dip"
                 android:gravity="left"
                 android:text="Activity Level" />
@@ -76,28 +76,6 @@
                 android:text="-" />
         </TableRow>
 
-
-        <TableRow>
-            <TextView
-                android:id="@+id/dataCount_label"
-                style="@style/EmpTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:textColor="@color/colorAccent"
-                android:padding="3dip"
-                android:gravity="left"
-                android:text="Sensor Data Count" />
-
-            <TextView
-                android:id="@+id/dataCount"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="right"
-                android:padding="3dip"
-                android:text="0" />
-        </TableRow>
-
         <TableRow>
             <TextView
                 android:id="@+id/resultCount_label"
@@ -107,7 +85,7 @@
                 android:layout_alignParentStart="true"
                 android:gravity="left"
                 android:padding="3dip"
-                android:textColor="@color/colorAccent"
+                android:textColor="@color/colorGreen"
                 android:text="Result Count" />
 
             <TextView
@@ -199,44 +177,6 @@
 
         <TableRow>
             <TextView
-                android:id="@+id/bvp_label"
-                style="@style/EmpTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:padding="3dip"
-                android:text="@string/bvp_label" />
-
-            <TextView
-                android:id="@+id/bvp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="right"
-                android:padding="3dip"
-                android:text="@string/emptyText" />
-        </TableRow>
-
-        <TableRow>
-            <TextView
-                android:id="@+id/eda_label"
-                style="@style/EmpTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="left"
-                android:padding="3dip"
-                android:text="@string/eda_label" />
-
-            <TextView
-                android:id="@+id/eda"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="right"
-                android:padding="3dip"
-                android:text="@string/emptyText" />
-        </TableRow>
-
-        <TableRow>
-            <TextView
                 android:id="@+id/ibi_label"
                 style="@style/EmpTitle"
                 android:layout_width="wrap_content"
@@ -256,12 +196,74 @@
 
         <TableRow>
             <TextView
+                android:id="@+id/ibi_mean_label"
+                style="@style/EmpTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="3dip"
+                android:text="IBI (Mean)" />
+
+            <TextView
+                android:id="@+id/ibi_mean"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="@string/emptyText" />
+        </TableRow>
+
+
+        <TableRow>
+            <TextView
+                android:id="@+id/bvp_label"
+                style="@style/EmpTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="3dip"
+                android:textColor="@color/colorGray"
+                android:text="@string/bvp_label" />
+
+            <TextView
+                android:id="@+id/bvp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="@string/emptyText" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/eda_label"
+                style="@style/EmpTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="3dip"
+                android:textColor="@color/colorGray"
+                android:text="@string/eda_label" />
+
+            <TextView
+                android:id="@+id/eda"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="@string/emptyText" />
+        </TableRow>
+
+
+        <TableRow>
+            <TextView
                 android:id="@+id/temp_label"
                 style="@style/EmpTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="left"
                 android:padding="3dip"
+                android:textColor="@color/colorGray"
                 android:text="@string/temp_label" />
 
             <TextView
@@ -281,6 +283,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="left"
                 android:padding="3dip"
+                android:textColor="@color/colorGray"
                 android:text="@string/battery_label" />
 
             <TextView
@@ -300,6 +303,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="left"
                 android:padding="3dip"
+                android:textColor="@color/colorGray"
                 android:text="Wristband Status" />
 
             <TextView

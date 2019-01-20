@@ -1,6 +1,9 @@
 package com.empatica.sample.Persistence;
 
 import android.util.Log;
+import android.widget.Toast;
+
+import com.empatica.sample.MainActivity;
 
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.stat.StatUtils;
@@ -135,10 +138,20 @@ public class Result {
         this.timestamp = timestamp;
     }
 
-    public void calculateHR(ArrayList<SensorData> ibis) {
+
+    public double calculateHR(ArrayList<SensorData> ibis) {
         double[] hrArr = dataListToArray(ibis);
-        this.setMeanHR(StatUtils.mean(hrArr));
+
+        double meanHR = StatUtils.mean(hrArr);
+        this.setMeanHR(meanHR);
+
         this.setStdHR(FastMath.sqrt(StatUtils.variance(hrArr)));
+
+
+        /**
+         * Fourier Transform Operations START
+         * Not used at the moment.
+         */
         double[] hrArr32 = new double[32];
         for (int i = 0; i < 32; i++) {
             hrArr32[i] = 0;
@@ -165,6 +178,11 @@ public class Result {
         if (hfCount != 0) {
             this.setLfhfHR(lfCount / hfCount);
         }
+        /**
+         * Fourier Transform Operations END
+         */
+
+        return meanHR;
     }
 
     public double calculateAcc(ArrayList<SensorData> xs, ArrayList<SensorData> ys, ArrayList<SensorData> zs) {
