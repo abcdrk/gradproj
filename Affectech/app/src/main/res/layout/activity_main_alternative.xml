@@ -58,70 +58,19 @@
             android:text="0" />
 
         <TextView
-            android:id="@+id/sensorAcc_label"
+            android:id="@+id/acc_magnitude_label"
             style="@style/EmpTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:text="Phone Accelerometers" />
+            android:text="Magnitude" />
 
         <TextView
-            android:id="@+id/sensorAccData"
+            android:id="@+id/acc_magnitude_area"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No Acceleration Sensor" />
+            android:text="0" />
 
-        <TextView
-            android:id="@+id/sensorLight_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Intensity"
-            style="@style/EmpTitle"/>
-
-        <TextView
-            android:id="@+id/sensorLightData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="-" />
-
-        <TextView
-            android:id="@+id/sensorTemp_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Temperature"
-            style="@style/EmpTitle"/>
-
-        <TextView
-            android:id="@+id/sensorTempData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="No Temperature Sensor" />
-
-        <TextView
-            android:id="@+id/sensorStep_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Step Sensor"
-            style="@style/EmpTitle"/>
-
-        <TextView
-            android:id="@+id/sensorStepData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="No Step Sensor" />
-
-        <TextView
-            android:id="@+id/callLog_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Call Log"
-            style="@style/EmpTitle"/>
-
-        <TextView
-            android:id="@+id/callLogData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="No Call Log" />
 
         <LinearLayout
             android:id="@+id/dataArea"

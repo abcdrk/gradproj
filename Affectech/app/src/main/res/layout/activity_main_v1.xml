@@ -1,0 +1,99 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:stretchColumns="1">
+        <TableRow>
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:textAlignment="center"
+                android:padding="3dip"
+                android:gravity="left"
+                android:text="Status"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/deviceName"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:textAlignment="center"
+                android:gravity="left"
+                android:padding="3dip"
+                android:text="Device ID"
+                android:textStyle="bold"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/dataCount_label"
+                style="@style/EmpTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:textColor="@color/colorAccent"
+                android:padding="3dip"
+                android:gravity="left"
+                android:text="Sensor Data Count" />
+
+            <TextView
+                android:id="@+id/dataCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="0" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/resultCount_label"
+                style="@style/EmpTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:gravity="left"
+                android:padding="3dip"
+                android:textColor="@color/colorAccent"
+                android:text="Result Count" />
+
+            <TextView
+                android:id="@+id/resultCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="0" />
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:id="@+id/acc_magnitude_label"
+                style="@style/EmpTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="left"
+                android:padding="3dip"
+                android:text="Magnitude" />
+
+            <TextView
+                android:id="@+id/acc_magnitude_area"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:padding="3dip"
+                android:text="0" />
+        </TableRow>
+    </TableLayout>
+
+</ScrollView>

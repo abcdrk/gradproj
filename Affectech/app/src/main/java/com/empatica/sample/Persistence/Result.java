@@ -167,24 +167,46 @@ public class Result {
         }
     }
 
-    public void calculateAcc(ArrayList<SensorData> xs, ArrayList<SensorData> ys, ArrayList<SensorData> zs) {
+    public double calculateAcc(ArrayList<SensorData> xs, ArrayList<SensorData> ys, ArrayList<SensorData> zs) {
         double[] xArr = dataListToArray(xs);
         double[] yArr = dataListToArray(ys);
         double[] zArr = dataListToArray(zs);
 
-        int length = Math.min(xArr.length,yArr.length);
-        length = Math.min(length, yArr.length);
+        int length = Math.min(Math.min(xArr.length, yArr.length), zArr.length);
 
-        int energy = 0;
+        ArrayList<Double> xSqrArr = new ArrayList<>();
+        ArrayList<Double> ySqrArr = new ArrayList<>();
+        ArrayList<Double> zSqrArr = new ArrayList<>();
 
-        for (int i= 0; i<length; i++){
-            
+        for (double x : xArr) {
+            xSqrArr.add(x * x);
         }
 
+        for (double y : yArr) {
+            ySqrArr.add(y * y);
+        }
+
+        for (double z : zArr) {
+            zSqrArr.add(z * z);
+        }
+
+        double[] pointMagnitude = new double[length];
+
+        for (int i = 0 ; i < length ; i++) {
+            pointMagnitude[i] = Math.sqrt(xSqrArr.get(i) + ySqrArr.get(i) + zSqrArr.get(i));
+        }
+
+        double energy = StatUtils.mean(pointMagnitude);
+
+        // The MAGNITUDE = ENERGY
+        this.setEnergyAcc(energy);
         this.setMeanX(StatUtils.mean(xArr));
         this.setMeanY(StatUtils.mean(yArr));
         this.setMeanZ(StatUtils.mean(zArr));
+
+        return energy;
     }
+
 
     public void calculateEDA(ArrayList<SensorData> edas) {
         double[] edaArr = dataListToArray(edas);

@@ -100,6 +100,12 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     private LinearLayout dataCnt;
 
+    private TextView dataCountLabel;
+
+    private TextView resultCountLabel;
+
+    private TextView accMagLabel;
+
 
     public static Lock insertLock = new ReentrantLock();
 
@@ -138,6 +144,12 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         batteryLabel = (TextView) findViewById(R.id.battery);
 
         deviceNameLabel = (TextView) findViewById(R.id.deviceName);
+
+        dataCountLabel = (TextView) findViewById(R.id.dataCount);
+
+        resultCountLabel = (TextView) findViewById(R.id.resultCount);
+
+        accMagLabel = (TextView) findViewById(R.id.acc_magnitude_area);
 
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 
@@ -252,7 +264,8 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         ArrayList<SensorData> ys = this.getDatabaseHelper().getSensorDatas(SensorData.Type.ACC_Y, date);
         ArrayList<SensorData> zs = this.getDatabaseHelper().getSensorDatas(SensorData.Type.ACC_Z, date);
 
-        result.calculateAcc(xs, ys, zs);
+        final double magnitude = result.calculateAcc(xs, ys, zs);
+
 
         ArrayList<SensorData> edas = this.getDatabaseHelper().getSensorDatas(SensorData.Type.EDA, date);
         result.calculateEDA(edas);
@@ -263,17 +276,19 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
         this.getDatabaseHelper().insertResult(result);
 
-        this.getDatabaseHelper().deleteSensorDatas();
 
         runOnUiThread(new Runnable() {
 
             @Override
             public void run() {
 
+                accMagLabel.setText("" + magnitude);
                 Toast.makeText(MainActivity.this, "Results are calculated", Toast.LENGTH_SHORT).show();
+                updateCountLabels();
             }
         });
 
+        this.getDatabaseHelper().deleteSensorDatas();
 
     }
 
@@ -471,6 +486,11 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     public void insertSensorData(SensorData.Type type, float value) {
         DataThread.getInstance(this.getDatabaseHelper()).insertSensorData(type, value);
+    }
+
+    public void updateCountLabels(){
+        dataCountLabel.setText(Integer.toString(this.getDatabaseHelper().getSensorDatasCount()));
+        resultCountLabel.setText(Integer.toString(this.getDatabaseHelper().getResultsCount()));
     }
 
 }
