@@ -110,8 +110,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     private TextView stress_level;
 
-    private TextView activity_level;
-
+    private TextView accLevelLabel;
 
     public static Lock insertLock = new ReentrantLock();
 
@@ -158,8 +157,8 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         ibi_mean = (TextView) findViewById(R.id.ibi_mean);
 
         stress_level = (TextView) findViewById(R.id.stress_level);
-
-        activity_level = (TextView) findViewById(R.id.activity_level);
+        
+        accLevelLabel = (TextView) findViewById(R.id.activity_level);
 
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 
@@ -306,6 +305,14 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
                     stress_level.setText("LOW");
                 }
 
+                if (magnitude > 70) {
+                    accLevelLabel.setText("HIGH");
+                } else if (magnitude < 40) {
+                    accLevelLabel.setText("LOW");
+                } else {
+                    accLevelLabel.setText("MEDIUM");
+                }
+                
                 Toast.makeText(MainActivity.this, "Results are calculated", Toast.LENGTH_SHORT).show();
                 updateCountLabels();
 
