@@ -153,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
         accMagLabel = (TextView) findViewById(R.id.acc_magnitude_area);
 
-        accLevelLabel = (TextView) findViewById(R.id.acc_level_area);
+        accLevelLabel = (TextView) findViewById(R.id.activity_level);
 
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 
