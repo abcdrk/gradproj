@@ -106,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
 
     private TextView accMagLabel;
 
+    private TextView accLevelLabel;
+
 
     public static Lock insertLock = new ReentrantLock();
 
@@ -150,6 +152,8 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
         resultCountLabel = (TextView) findViewById(R.id.resultCount);
 
         accMagLabel = (TextView) findViewById(R.id.acc_magnitude_area);
+
+        accLevelLabel = (TextView) findViewById(R.id.activity_level);
 
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 
@@ -283,6 +287,13 @@ public class MainActivity extends AppCompatActivity implements EmpaDataDelegate,
             public void run() {
 
                 accMagLabel.setText("" + magnitude);
+                if (magnitude > 70) {
+                    accLevelLabel.setText("HIGH");
+                } else if (magnitude < 40) {
+                    accLevelLabel.setText("LOW");
+                } else {
+                    accLevelLabel.setText("MEDIUM");
+                }
                 Toast.makeText(MainActivity.this, "Results are calculated", Toast.LENGTH_SHORT).show();
                 updateCountLabels();
             }
